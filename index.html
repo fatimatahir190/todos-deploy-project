@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+</head>
+
+<body>
+
+    <h1>Todo App</h1>
+
+    <!-- Add Todo Form -->
+    <h2 id="formTitle">Add Todo</h2>
+
+    <form id="todoForm">
+
+        <label>Title:</label>
+        <input type="text" id="title" required>
+
+        <br><br>
+
+        <label>Description:</label>
+        <input type="text" id="description" required>
+
+        <br><br>
+
+        <label>Completed:</label>
+        <input type="checkbox" id="is_completed">
+
+        <br><br>
+
+        <button type="submit" id="submitBtn">Add Todo</button>
+        <button type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
+
+    </form>
+
+    <hr>
+
+    <!-- Todo List -->
+    <h2>My Todos</h2>
+
+    <div id="todoList"></div>
+
+
+    <script>
+
+        const API_URL = "https://todos-production-f898.up.railway.app";
+
+        let editingId = null;   // agar null hai to "Add" mode, warna "Edit" mode
+
+
+        // Add / Update Todo (same form handles both)
+        document.getElementById("todoForm").addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const is_completed = document.getElementById("is_completed").checked;
+
+            if (editingId === null) {
+
+                // ADD mode
+                const response = await fetch(`${API_URL}/todos`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description, is_completed })
+                });
+
+                const data = await response.json();
+                console.log(data);
+                alert("Todo Added!");
+
+            } else {
+
+                // EDIT mode
+                const response = await fetch(`${API_URL}/todos/${editingId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, description, is_completed })
+                });
+
+                const data = await response.json();
+                console.log(data);
+                alert("Todo Updated!");
+
+                cancelEdit();  // form ko wapis "Add" mode mein le aao
+
+            }
+
+            document.getElementById("todoForm").reset();
+            getTodos();
+
+        });
+
+
+        // Get Todos
+        async function getTodos() {
+
+            const response = await fetch(`${API_URL}/todos`);
+            const todos = await response.json();
+
+            const todoList = document.getElementById("todoList");
+            todoList.innerHTML = "";
+
+            todos.forEach(function(todo) {
+
+                const todoItem = document.createElement("div");
+
+                todoItem.innerHTML = `
+                    <h3>${todo.title}</h3>
+                    <p>${todo.description}</p>
+                    <p>Completed: ${todo.is_completed}</p>
+
+                    <button onclick='startEdit(${JSON.stringify(todo)})'>
+                        Edit
+                    </button>
+
+                    <button onclick="deleteTodo(${todo.id})">
+                        Delete
+                    </button>
+
+                    <hr>
+                `;
+
+                todoList.appendChild(todoItem);
+
+            });
+
+        }
+
+
+        // Start Edit — form ko us todo ke data se bhar do
+        function startEdit(todo) {
+
+            editingId = todo.id;
+
+            document.getElementById("title").value = todo.title;
+            document.getElementById("description").value = todo.description;
+            document.getElementById("is_completed").checked = todo.is_completed;
+
+            document.getElementById("formTitle").innerText = "Edit Todo";
+            document.getElementById("submitBtn").innerText = "Update Todo";
+            document.getElementById("cancelBtn").style.display = "inline";
+
+            window.scrollTo(0, 0);
+
+        }
+
+
+        // Cancel Edit — wapis "Add" mode
+        function cancelEdit() {
+
+            editingId = null;
+
+            document.getElementById("todoForm").reset();
+            document.getElementById("formTitle").innerText = "Add Todo";
+            document.getElementById("submitBtn").innerText = "Add Todo";
+            document.getElementById("cancelBtn").style.display = "none";
+
+        }
+
+
+        // Delete Todo
+        async function deleteTodo(todo_id) {
+
+            const response = await fetch(`${API_URL}/todos/${todo_id}`, {
+                method: "DELETE"
+            });
+
+            const data = await response.json();
+            console.log(data);
+            alert("Todo Deleted!");
+
+            getTodos();
+
+        }
+
+
+        // Load todos when page opens
+        getTodos();
+
+    </script>
+
+</body>
+</html>
