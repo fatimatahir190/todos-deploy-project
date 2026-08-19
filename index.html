@@ -40,7 +40,6 @@
     margin:0 auto;
   }
 
-  /* ---------- Header ---------- */
   header{
     margin-bottom:40px;
     color:var(--paper);
@@ -89,7 +88,6 @@
   }
   .count strong{ color:var(--amber); font-weight:500; }
 
-  /* ---------- Add card ---------- */
   .add-card{
     background:var(--paper);
     border-radius:4px;
@@ -201,7 +199,6 @@
   }
   .btn-ghost:hover{ color:var(--coral); }
 
-  /* ---------- List ---------- */
   .list-head{
     display:flex;
     justify-content:space-between;
@@ -331,7 +328,6 @@
   .icon-btn.danger:hover{ color:var(--coral); }
   .icon-btn svg{ width:15px; height:15px; }
 
-  /* ---------- misc ---------- */
   .toast{
     position:fixed;
     bottom:26px; left:50%;
@@ -416,8 +412,8 @@
   <div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
 
 <script>
-  // ---- point this at your deployed backend ----
-  const API_URL = "http://127.0.0.1:8000";
+  // ---- deployed backend on Railway ----
+  const API_URL = "https://todos-production-0389.up.railway.app";
 
   let editingId = null;
   let todosCache = [];
